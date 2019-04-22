@@ -37,18 +37,18 @@ from tensorflow.python.platform import flags
 
 FLAGS = flags.FLAGS
 
-## Dataset/method options
+## Dataset/method options  数据集/方法选项
 flags.DEFINE_string('datasource', 'sinusoid', 'sinusoid or omniglot or miniimagenet')
 flags.DEFINE_integer('num_classes', 5, 'number of classes used in classification (e.g. 5-way classification).')
 # oracle means task id is input (only suitable for sinusoid)
 flags.DEFINE_string('baseline', None, 'oracle, or None')
 
 ## Training options
-flags.DEFINE_integer('pretrain_iterations', 0, 'number of pre-training iterations.')
+flags.DEFINE_integer('pretrain_iterations', 0, 'number of pre-training iterations.') # 训练前迭代次数
 flags.DEFINE_integer('metatrain_iterations', 15000, 'number of metatraining iterations.') # 15k for omniglot, 50k for sinusoid
-flags.DEFINE_integer('meta_batch_size', 25, 'number of tasks sampled per meta-update')
-flags.DEFINE_float('meta_lr', 0.001, 'the base learning rate of the generator')
-flags.DEFINE_integer('update_batch_size', 5, 'number of examples used for inner gradient update (K for K-shot learning).')
+flags.DEFINE_integer('meta_batch_size', 25, 'number of tasks sampled per meta-update') # 每次元更新采样的任务数
+flags.DEFINE_float('meta_lr', 0.001, 'the base learning rate of the generator') # 生成器的基本学习率
+flags.DEFINE_integer('update_batch_size', 5, 'number of examples used for inner gradient update (K for K-shot learning).') 
 flags.DEFINE_float('update_lr', 1e-3, 'step size alpha for inner gradient update.') # 0.1 for omniglot
 flags.DEFINE_integer('num_updates', 1, 'number of inner gradient updates during training.')
 
@@ -80,7 +80,7 @@ def train(model, saver, sess, exp_string, data_generator, resume_itr=0):
         TEST_PRINT_INTERVAL = PRINT_INTERVAL*5
 
     if FLAGS.log:
-        train_writer = tf.summary.FileWriter(FLAGS.logdir + '/' + exp_string, sess.graph)
+        train_writer = tf.summary.FileWriter(FLAGS.logdir + '/' + exp_string, sess.graph)# 创建一个file writer用来向硬盘写summary数据
     print('Done initializing, starting training.')
     prelosses, postlosses = [], []
 
@@ -215,6 +215,7 @@ def test(model, saver, sess, exp_string, data_generator, test_num_updates=None):
         writer.writerow(ci95)
 
 def main():
+    ## 选择数据集
     if FLAGS.datasource == 'sinusoid':
         if FLAGS.train:
             test_num_updates = 5
@@ -228,19 +229,20 @@ def main():
                 test_num_updates = 10
         else:
             test_num_updates = 10
+    ## 选择结束
 
-    if FLAGS.train == False:
+    if FLAGS.train == False: # 测试
         orig_meta_batch_size = FLAGS.meta_batch_size
-        # always use meta batch size of 1 when testing.
+        # always use meta batch size of 1 when testing.？？（测试时总用为1的原因再看一下）
         FLAGS.meta_batch_size = 1
 
-    if FLAGS.datasource == 'sinusoid':
+    if FLAGS.datasource == 'sinusoid': # 什么是正弦曲线？？
         data_generator = DataGenerator(FLAGS.update_batch_size*2, FLAGS.meta_batch_size)
     else:
         if FLAGS.metatrain_iterations == 0 and FLAGS.datasource == 'miniimagenet':
             assert FLAGS.meta_batch_size == 1
             assert FLAGS.update_batch_size == 1
-            data_generator = DataGenerator(1, FLAGS.meta_batch_size)  # only use one datapoint,
+            data_generator = DataGenerator(1, FLAGS.meta_batch_size)  # only use one datapoint,什么是生成数据？？？
         else:
             if FLAGS.datasource == 'miniimagenet': # TODO - use 15 val examples for imagenet?
                 if FLAGS.train:
