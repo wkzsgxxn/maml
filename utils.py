@@ -49,10 +49,10 @@ def normalize(inp, activation, reuse, scope):
 
 ## Loss functions
 def mse(pred, label):
-    pred = tf.reshape(pred, [-1])
+    pred = tf.reshape(pred, [-1])  # 将矩阵pred变为一维矩阵
     label = tf.reshape(label, [-1])
-    return tf.reduce_mean(tf.square(pred-label))
+    return tf.reduce_mean(tf.square(pred-label)) # 就平均值（平方操作）
 
 def xent(pred, label):
     # Note - with tf version <=0.12, this loss has incorrect 2nd derivatives
-    return tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=label) / FLAGS.update_batch_size
+    return tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=label) / FLAGS.update_batch_size # 计算损失函数
